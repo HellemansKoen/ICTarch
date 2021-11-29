@@ -23,52 +23,54 @@ app.post('/register', (req, res) => {
         .then((cogResponse) => res.status(201).json(cogResponse))
         .catch((cogResponse) => res.status(404).json(cogResponse))
 });
-// login
+// Login
 app.post('/login', (req, res) => {
     security.login(req.body.email, req.body.password)
         .then((cogResponse) => res.status(201).json(cogResponse))
         .catch((cogResponse) => res.status(404).json(cogResponse))
 });
-
 // Downloaden bestanden --> nog doen
-app.get("/api/files/:uuid", async(req, res) => {
-    const response = await downloadFile(req.params.uuid);
-    res.download("hallo");
+app.get("/downloaden/:uuid", (req, res) => {
+    const response = downloadFile(req.params.uuid);
+    response
+        .then(() => {
+            console.log("goed");
+            res.status(201).json({ "message": "goed gedownload" });
+        })
+        .catch(() => {
+            console.log("slecht");
+            res.status(400).json({ "message": "niet gedownload" });
+        });
 });
-
-const downloadFile = async(bestand) => {
+const downloadFile = (bestand) => {
     const bucketParams = {
         Bucket: "buckets3project",
         key: bestand.name
     }
-    const response = await s3.send(new GetObjectCommand(bucketParams));
+    const response = s3.send(new GetObjectCommand(bucketParams));
     return response;
-}
-
-// Uploaden bestanden ==> vragen voor na te kijken
+};
+// Uploaden bestanden ==> werkt
 app.post("/uploaden", (req, res) => {
     const promise = uploadFile(req.files.bestand);
-    promise.then((response) => {
+    promise.then(() => {
             console.log("goed");
             res.status(201).json({ "message": "jippie" });
         })
-        .catch((err) => {
+        .catch(() => {
             console.log("slecht");
             res.status(400).json({ "message": "spijtig" });
         })
 });
 const uploadFile = (bestand) => {
-    // Setting up S3 upload parameters
     const params = {
         Bucket: "buckets3project",
-        Key: bestand.name, // File name you want to save as in S3
+        Key: bestand.name,
         Body: bestand.data
     };
-    // Uploading files to the bucket
     return s3.send(new PutObjectCommand(params));
-}
-
-// luister naar poort
+};
+// luistert naar poort
 app.listen(3000, () => {
     console.log('Started api on http://localhost:3000');
 });
