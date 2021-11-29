@@ -5,6 +5,7 @@ const fileUpload = require("express-fileupload")
 const Region = "uw-east-1";
 const { S3Client } = require("@aws-sdk/client-s3");
 const { PutObjectCommand } = require("@aws-sdk/client-s3");
+const { GetObjectCommand } = require("@aws-sdk/client-s3")
 const s3 = new S3Client({ region: Region })
 const app = express();
 const security = require('./security');
@@ -32,7 +33,19 @@ app.listen(3000, () => {
     console.log('Started api on http://localhost:3000');
 });
 // Downloaden bestanden --> nog doen
-app.get("/api/files/{uuid} ", (req, res) => {});
+app.get("/api/files/{uuid} ", (req, res) => {
+    res.download(downloadFile(req.params.bestand).Body);
+});
+
+const downloadFile = (bestand) =>{
+    const bucketParams = {
+        Bucket: "buckets3project",
+        key: bestand.name
+    }
+    const response = await s3.send(new GetObjectCommand(bucketParams));
+    return response;
+}
+
 // Uploaden bestanden ==> vragen voor na te kijken
 app.post("/uploaden", (req, res) => {
     uploadFile(req.files.bestand);
