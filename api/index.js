@@ -17,22 +17,23 @@ app.use(bodyParser.json());
 app.get('/', (req, res) => {
     res.json('Hello world');
 });
-// Registreren
+// Registreren ==> werkt
 app.post('/register', (req, res) => {
     security.registerUser(req.body.email, req.body.password)
         .then((cogResponse) => res.status(201).json(cogResponse))
         .catch((cogResponse) => res.status(404).json(cogResponse))
 });
-// Login
+// Login ==> werkt
 app.post('/login', (req, res) => {
     security.login(req.body.email, req.body.password)
         .then((cogResponse) => res.status(201).json(cogResponse))
         .catch((cogResponse) => res.status(404).json(cogResponse))
 });
-// Downloaden bestanden --> nog doen
+// Downloaden bestanden --> werkt niet
 app.get("/downloaden/:uuid", (req, res) => {
-    const response = downloadFile(req.params.uuid);
-    response
+    const promise = downloadFile(req.params.uuid);
+    console.log(promise)
+    promise
         .then(() => {
             console.log("goed");
             res.status(201).json({ "message": "goed gedownload" });
@@ -45,10 +46,13 @@ app.get("/downloaden/:uuid", (req, res) => {
 const downloadFile = (bestand) => {
     const bucketParams = {
         Bucket: "buckets3project",
-        key: bestand.name
+        key: bestand
     }
     const response = s3.send(new GetObjectCommand(bucketParams));
+    console.log(response)
+
     return response;
+
 };
 // Uploaden bestanden ==> werkt
 app.post("/uploaden", (req, res) => {
@@ -70,7 +74,7 @@ const uploadFile = (bestand) => {
     };
     return s3.send(new PutObjectCommand(params));
 };
-// luistert naar poort
+// Luistert naar poort
 app.listen(3000, () => {
     console.log('Started api on http://localhost:3000');
 });
