@@ -57,11 +57,12 @@ const downloadFile = (bestand) => {
 // Uploaden bestanden ==> werkt
 app.post("/uploaden", (req, res) => {
     const promise = uploadFile(req.files.bestand);
-    promise.then(() => {
+    console.log(promise);
+    promise.then((response) => {
             console.log("goed");
             res.status(201).json({ "message": "jippie" });
         })
-        .catch(() => {
+        .catch((err) => {
             console.log("slecht");
             res.status(400).json({ "message": "spijtig" });
         })
