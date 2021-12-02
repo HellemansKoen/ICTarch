@@ -10,12 +10,15 @@ const s3 = new S3Client({ region: Region })
 const app = express();
 const security = require('./security');
 const { response } = require('express');
+const { v4: uuidv4 } = require('uuid');
+
+
 app.use(fileUpload())
 app.use(express.json());
 app.use(bodyParser.json());
 // Homepage
 app.get('/', (req, res) => {
-    res.json('Hello world');
+    // res.json();
 });
 // Registreren ==> werkt
 app.post('/register', (req, res) => {
@@ -54,25 +57,27 @@ const downloadFile = (bestand) => {
     return response;
 
 };
-// Uploaden bestanden ==> werkt
+// Uploaden bestanden --> werkt ==> UUID nog toevoegen
 app.post("/uploaden", (req, res) => {
     const promise = uploadFile(req.files.bestand);
-    console.log(promise);
-    promise.then((response) => {
+    promise.then(() => {
             console.log("goed");
             res.status(201).json({ "message": "jippie" });
         })
-        .catch((err) => {
+        .catch(() => {
             console.log("slecht");
             res.status(400).json({ "message": "spijtig" });
         })
 });
 const uploadFile = (bestand) => {
+    let myuuid = uuidv4();
+    console.log('Your UUID is: ' + myuuid);
     const params = {
         Bucket: "buckets3project",
-        Key: bestand.name,
+        Key: myuuid + "." + bestand.name,
         Body: bestand.data
     };
+    console.log(bestand.name + ":" + myuuid);
     return s3.send(new PutObjectCommand(params));
 };
 // Luistert naar poort
