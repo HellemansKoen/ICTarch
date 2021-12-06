@@ -10,7 +10,9 @@ const s3 = require("./s3")
 const app = express();
 const security = require('./security');
 // const { response } = require('express');
-const { v4: uuidv4 } = require('uuid');
+const {
+    v4: uuidv4
+} = require('uuid');
 
 
 app.use(fileUpload())
@@ -34,24 +36,23 @@ app.post('/login', (req, res) => {
         .catch((cogResponse) => res.status(404).json(cogResponse))
 })
 
-app.post('/api/files',(req,res)=>{
+app.post('/api/files', (req, res) => {
     const file = req.files.myfile;
     const uuid = uuidv4()
-    if(!file){
+    if (!file) {
         res.send("Niet verzonden")
         return
     }
-    const output = s3.uploadFile(file,uuid + ":" + file.name)
+    const output = s3.uploadFile(file, uuid + ":" + file.name)
     res.send(output)
 })
 
-app.get('/api/files/:uuid',(req,res)=>{
+app.get('/api/files/:uuid', (req, res) => {
     const uuid = req.params.uuid
     res.attachment(uuid.split(":")[1])
     const readStream = s3.download(uuid)
     readStream.pipe(res)
 })
-
 
 
 // // Downloaden bestanden --> werkt niet
@@ -105,7 +106,6 @@ app.get('/api/files/:uuid',(req,res)=>{
 // Luistert naar poort
 
 
-app.listen(3000, () => {
-    console.log('Started api on http://localhost:3000');
+app.listen(80, () => {
+    console.log('Started api on http://localhost:80');
 });
-
