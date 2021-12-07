@@ -43,6 +43,24 @@ app.post('/api/files', (req, res) => {
         const uuid = uuidv4()
         if (!file) {
             res.send("Niet verzonden")
+        } else {
+            const output = s3.uploadFile(file, uuid + ":" + file.name)
+            res.send(output);
+            // RDS
+            rdsUpload(uuid, file, res);
+        }
+    } else {
+        res.send("inoggen is verplicht om files te uploaden");
+    }
+});
+/* oorspronkelijk
+ app.post('/api/files', (req, res) => {
+    // S3
+    if (validateToken()) {
+        const file = req.files.myfile;
+        const uuid = uuidv4()
+        if (!file) {
+            res.send("Niet verzonden")
             return
         }
         const output = s3.uploadFile(file, uuid + ":" + file.name)
@@ -52,15 +70,15 @@ app.post('/api/files', (req, res) => {
     } else {
         res.send("inoggen is verplicht om files te uploaden");
     }
-});
+}); 
+*/
+
 // validateToken nog testen
 function validateToken() {
     security.login(req.body.email, req.body.password).catch((err) => {
         console.error(err)
     }).then((e) => {
-        JWT = e.accessToken.jwtToken;
-        RefreshToken = e.refreshToken.token
-        sub = e.idToken.payload.sub
+        let JWT = e.accessToken.jwtToken;
         res.send(sub)
     });
     const validation = await security.validateToken(JWT).catch((err) => err)
