@@ -35,24 +35,26 @@ app.post('/login', (req, res) => {
         .then((cogResponse) => res.status(201).json(cogResponse))
         .catch((cogResponse) => res.status(404).json(cogResponse))
 });
-// Uploaden ==> werkt
+// Uploaden ==> werkt ong
 app.post('/api/files', (req, res) => {
     // S3
-    if (validateToken()) {
-        const file = req.files.myfile;
-        const uuid = uuidv4()
-        if (!file) {
-            res.send("Niet verzonden")
-        } else {
-            const output = s3.uploadFile(file, uuid + ":" + file.name)
-            res.send(output);
-            // RDS
-            rdsUpload(uuid, file, res);
-        }
+    //if (validateToken()) {
+    const file = req.files.myfile;
+    const uuid = uuidv4()
+    if (!file) {
+        res.send("Niet verzonden")
+    } else {
+        const output = s3.uploadFile(file, uuid + ":" + file.name)
+        res.send(output);
+        // RDS
+        rdsUpload(uuid, file, res);
+    }
+    /*
     } else {
         res.send("inoggen is verplicht om files te uploaden");
-    }
+    }*/
 });
+
 /* oorspronkelijk
  app.post('/api/files', (req, res) => {
     // S3
@@ -103,14 +105,17 @@ function rdsUpload(uuid, file, res) {
 };
 // Downloaden ==> werkt
 app.get('/api/files/:uuid', (req, res) => {
-    if (validateToken()) {
-        const uuid = req.params.uuid
-        res.attachment(uuid.split(":")[1])
-        const readStream = s3.download(uuid)
-        readStream.pipe(res)
-    } else {
-        res.send("inoggen is verplicht om files te downloaden");
-    }
+    //if (validateToken()) {
+    const uuid = req.params.uuid
+    res.attachment(uuid.split(":")[1])
+    const readStream = s3.download(uuid)
+    readStream.pipe(res)
+        /*
+        } 
+        else {
+            res.send("inoggen is verplicht om files te downloaden");
+        }
+        */
 });
 // Luistert naar poort
 app.listen(80, () => {
