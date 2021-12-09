@@ -57,25 +57,6 @@ app.post('/api/files', async(req, res) => {
     }
 });
 
-// validateToken nog testen --> geeft fout als ik op "uplaoden" klik
-/*
-const tokenValidation = async(req) => {
-    let JWT = "";
-    security.login(req.body.email, req.body.password).catch((err) => {
-            console.error("err")
-        })
-        .then((e) => {
-            JWT = e.accessToken.jwtToken;
-        });
-    const validation = await security.validateToken(JWT).catch((err) => err)
-    if (validation === "Valid Token.") {
-        return true;
-    } else {
-        return false;
-    }
-}
-*/
-
 function rdsUpload(uuid, file, res) {
     let datum = new Date().toISOString().slice(0, 19).replace('T', ' ');
     // Datum toevoegen
