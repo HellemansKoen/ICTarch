@@ -6,14 +6,14 @@ const app = express();
 const security = require('./security');
 const { v4: uuidv4 } = require('uuid');
 
-var mysql = require('mysql');
-var connection = mysql.createConnection({
+let mysql = require('mysql');
+let connection = mysql.createConnection({
     host: 'dbproject.cidfnmmcutrg.us-east-1.rds.amazonaws.com',
     user: 'admin',
     password: 'azerty123',
     database: 'project_dev'
 });
-
+let JWT = "";
 connection.connect();
 app.use(fileUpload())
 app.use(express.json());
@@ -31,14 +31,18 @@ app.post('/register', (req, res) => {
 });
 // Login ==> werkt
 app.post('/login', (req, res) => {
-    security.login(req.body.email, req.body.password)
-        .then((cogResponse) => res.status(201).json(cogResponse))
-        .catch((cogResponse) => res.status(404).json(cogResponse))
+    security.login(req.body.email, req.body.password).catch((err) => {
+            console.error("err")
+        })
+        .then((e) => {
+            JWT = e.accessToken.jwtToken;
+        });
 });
 // Uploaden ==> werkt
-app.post('/api/files', (req, res) => {
+app.post('/api/files', async(req, res) => {
     // S3
-    if (validateToken(req)) {
+    const validation = await security.validateToken(JWT).catch((err) => err)
+    if (validation === "Valid Token.") {
         const file = req.files.myfile;
         const uuid = uuidv4()
         if (!file) {
@@ -54,12 +58,14 @@ app.post('/api/files', (req, res) => {
 });
 
 // validateToken nog testen --> geeft fout als ik op "uplaoden" klik
-const Validatetoken = async(req) => {
+/*
+const tokenValidation = async(req) => {
+    let JWT = "";
     security.login(req.body.email, req.body.password).catch((err) => {
             console.error("err")
         })
         .then((e) => {
-            let JWT = e.accessToken.jwtToken;
+            JWT = e.accessToken.jwtToken;
         });
     const validation = await security.validateToken(JWT).catch((err) => err)
     if (validation === "Valid Token.") {
@@ -68,6 +74,7 @@ const Validatetoken = async(req) => {
         return false;
     }
 }
+*/
 
 function rdsUpload(uuid, file, res) {
     let datum = new Date().toISOString().slice(0, 19).replace('T', ' ');
@@ -82,8 +89,9 @@ function rdsUpload(uuid, file, res) {
     });
 };
 // Downloaden ==> werkt
-app.get('/api/files/:uuid', (req, res) => {
-    if (validateToken(req)) {
+app.get('/api/files/:uuid', async(req, res) => {
+    const validation = await security.validateToken(JWT).catch((err) => err)
+    if (validation === "Valid Token.") {
         const uuid = req.params.uuid
         res.attachment(uuid.split(":")[1])
         const readStream = s3.download(uuid)
