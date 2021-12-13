@@ -10,7 +10,12 @@
     <div>
       <h2>upload file</h2>
       <form method="POST" action="/api/files" enctype="multipart/form-data">
-        <input type="text" name="token" id="">
+        <input
+          type="text"
+          name="token"
+          id="token"
+          placeholder="Geef hier uw token mee"
+        /><input />
         <input type="file" name="myfile" />
         <input type="submit" value="upload" />
       </form>
