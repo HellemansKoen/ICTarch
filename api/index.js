@@ -38,7 +38,7 @@ app.post('/login', (req, res) => {
 // Uploaden ==> werkt
 app.post('/api/files', async (req, res) => {
     // S3
-    const validation = await security.validateToken(JWT).catch((err) => err)
+    const validation = await security.validateToken(req.body.id).catch((err) => err)
     if (validation === "Valid Token.") {
         const file = req.files.myfile;
         const uuid = uuidv4()
@@ -53,7 +53,7 @@ app.post('/api/files', async (req, res) => {
         res.send("inoggen is verplicht om files te uploaden");
     }
 });
-
+// RDS ==> werkt
 function rdsUpload(uuid, file, res) {
     let datum = new Date().toISOString().slice(0, 19).replace('T', ' ');
     // Datum toevoegen
