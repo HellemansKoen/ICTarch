@@ -4,7 +4,10 @@ const fileUpload = require("express-fileupload")
 const s3 = require("./s3")
 const app = express();
 const security = require('./security');
-const { v4: uuidv4 } = require('uuid');
+const db = require("./db.js")
+const {
+    v4: uuidv4
+} = require('uuid');
 
 let mysql = require('mysql');
 let connection = mysql.createConnection({
@@ -18,7 +21,7 @@ connection.connect();
 app.use(fileUpload())
 app.use(express.json());
 app.use(bodyParser.json());
-
+security.validateToken()
 // // Homepage
 app.get('/', (req, res) => {
     res.sendFile(__dirname + "/index.html")
@@ -39,7 +42,7 @@ app.post('/login', (req, res) => {
         });
 });
 // Uploaden ==> werkt
-app.post('/api/files', async(req, res) => {
+app.post('/api/files', async (req, res) => {
     // S3
     const validation = await security.validateToken(JWT).catch((err) => err)
     if (validation === "Valid Token.") {
@@ -60,17 +63,17 @@ app.post('/api/files', async(req, res) => {
 function rdsUpload(uuid, file, res) {
     let datum = new Date().toISOString().slice(0, 19).replace('T', ' ');
     // Datum toevoegen
-    connection.query(`insert into file_metadata (uuid,filename, creatieDatum) values ("${uuid}", "${file.name}", "${datum}")`, function(error, results, fields) {
+    db.fileInsert(uuid,file,datum), function (error, results, fields) {
         if (error) {
             res.status(400).json(result);
             throw error;
         } else {
             res.status(200).json(result);
         }
-    });
+    }
 };
 // Downloaden ==> werkt
-app.get('/api/files/:uuid', async(req, res) => {
+app.get('/api/files/:uuid', async (req, res) => {
     const validation = await security.validateToken(JWT).catch((err) => err)
     if (validation === "Valid Token.") {
         const uuid = req.params.uuid

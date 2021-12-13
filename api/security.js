@@ -15,9 +15,12 @@ const userPool = new AmazonCognitoIdentity.CognitoUserPool(poolData);
 function registerUser(email, password) {
     return new Promise((resolve, reject) => {
         const attributeList = [
-            new AmazonCognitoIdentity.CognitoUserAttribute({ Name: "email", Value: email })
+            new AmazonCognitoIdentity.CognitoUserAttribute({
+                Name: "email",
+                Value: email
+            })
         ];
-        userPool.signUp(email, password, attributeList, null, function(err, result) {
+        userPool.signUp(email, password, attributeList, null, function (err, result) {
             if (err) {
                 reject(err);
             } else {
@@ -39,10 +42,10 @@ function login(email, password) {
         };
         const cognitoUser = new AmazonCognitoIdentity.CognitoUser(userData);
         cognitoUser.authenticateUser(authenticationDetails, {
-            onSuccess: function(result) {
+            onSuccess: function (result) {
                 resolve(result);
             },
-            onFailure: function(err) {
+            onFailure: function (err) {
                 reject(err);
             },
         });
@@ -54,7 +57,7 @@ function validateToken(token) {
         request({
             url: `https://cognito-idp.${pool_region}.amazonaws.com/${poolData.UserPoolId}/.well-known/jwks.json`,
             json: true
-        }, function(error, response, body) {
+        }, function (error, response, body) {
             if (!error && response.statusCode === 200) {
                 pems = {};
                 var keys = body['keys'];
@@ -64,12 +67,18 @@ function validateToken(token) {
                     var modulus = keys[i].n;
                     var exponent = keys[i].e;
                     var key_type = keys[i].kty;
-                    var jwk = { kty: key_type, n: modulus, e: exponent };
+                    var jwk = {
+                        kty: key_type,
+                        n: modulus,
+                        e: exponent
+                    };
                     var pem = jwkToPem(jwk);
                     pems[key_id] = pem;
                 }
                 //validate the token
-                var decodedJwt = jwt.decode(token, { complete: true });
+                var decodedJwt = jwt.decode(token, {
+                    complete: true
+                });
                 if (!decodedJwt) {
                     reject("Not a valid JWT token");
                     return;
@@ -80,7 +89,7 @@ function validateToken(token) {
                     reject('Invalid token');
                     return;
                 }
-                jwt.verify(token, pem, function(err, payload) {
+                jwt.verify(token, pem, function (err, payload) {
                     if (err) {
                         reject("Invalid Token.");
                     } else {
