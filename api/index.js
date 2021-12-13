@@ -9,13 +9,10 @@ const {
     v4: uuidv4
 } = require('uuid');
 
-
-let JWT = "";
 //connection.connect();
 app.use(fileUpload())
 app.use(express.json());
 app.use(bodyParser.json());
-security.validateToken()
 // // Homepage
 app.get('/', (req, res) => {
     res.sendFile(__dirname + "/index.html")
@@ -28,17 +25,18 @@ app.post('/register', (req, res) => {
 });
 // Login ==> werkt
 app.post('/login', (req, res) => {
-    security.login(req.body.email, req.body.password).catch((err) => {
-            console.error("err")
-        })
+    security.login(req.body.email, req.body.password)
         .then((e) => {
-            JWT = e.accessToken.jwtToken;
+            res.send(e)
+        })
+        .catch((err) => {
+            console.error("err")
         });
 });
 // Uploaden ==> werkt
-app.post('/api/files', async (req, res) => {
+app.post('/api/files', async(req, res) => {
     // S3
-    const validation = await security.validateToken(req.body.id).catch((err) => err)
+    const validation = await security.validateToken(req.body.token).catch((err) => err)
     if (validation === "Valid Token.") {
         const file = req.files.myfile;
         const uuid = uuidv4()
@@ -58,7 +56,7 @@ function rdsUpload(uuid, file, res) {
     let datum = new Date().toISOString().slice(0, 19).replace('T', ' ');
     // Datum toevoegen
     db.fileInsert(uuid, file, datum),
-        function (error, results, fields) {
+        function(error, results, fields) {
             if (error) {
                 res.status(400).json(result);
                 throw error;
@@ -68,8 +66,8 @@ function rdsUpload(uuid, file, res) {
         }
 };
 // Downloaden ==> werkt
-app.get('/api/files/:uuid', async (req, res) => {
-    const validation = await security.validateToken(JWT).catch((err) => err)
+app.get('/api/files/:uuid', async(req, res) => {
+    const validation = await security.validateToken(req.query.token).catch((err) => err)
     if (validation === "Valid Token.") {
         const uuid = req.params.uuid
         res.attachment(uuid.split(":")[1])
