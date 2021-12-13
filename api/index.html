@@ -8,12 +8,9 @@
   </head>
   <body>
     <div>
-      <h2>inloggen</h2>
-      <form action="/login"></form>
-    </div>
-    <div>
       <h2>upload file</h2>
       <form method="POST" action="/api/files" enctype="multipart/form-data">
+        <input type="text" name="token" id="">
         <input type="file" name="myfile" />
         <input type="submit" value="upload" />
       </form>

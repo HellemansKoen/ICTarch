@@ -9,15 +9,9 @@ const {
     v4: uuidv4
 } = require('uuid');
 
-let mysql = require('mysql');
-let connection = mysql.createConnection({
-    host: 'dbproject.cidfnmmcutrg.us-east-1.rds.amazonaws.com',
-    user: 'admin',
-    password: 'azerty123',
-    database: 'project_dev'
-});
+
 let JWT = "";
-connection.connect();
+//connection.connect();
 app.use(fileUpload())
 app.use(express.json());
 app.use(bodyParser.json());
@@ -63,14 +57,15 @@ app.post('/api/files', async (req, res) => {
 function rdsUpload(uuid, file, res) {
     let datum = new Date().toISOString().slice(0, 19).replace('T', ' ');
     // Datum toevoegen
-    db.fileInsert(uuid,file,datum), function (error, results, fields) {
-        if (error) {
-            res.status(400).json(result);
-            throw error;
-        } else {
-            res.status(200).json(result);
+    db.fileInsert(uuid, file, datum),
+        function (error, results, fields) {
+            if (error) {
+                res.status(400).json(result);
+                throw error;
+            } else {
+                res.status(200).json(result);
+            }
         }
-    }
 };
 // Downloaden ==> werkt
 app.get('/api/files/:uuid', async (req, res) => {
