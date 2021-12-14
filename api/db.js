@@ -7,8 +7,8 @@ let connection = mysql.createConnection({
     database: 'project_dev'
 });
 
-const fileInsert = (uuid, fileName, date) => {
-    connection.query(`INSERT INTO file_metadata(uuid,filename, creatieDatum) VALUES("${uuid}", "${fileName}", "${datum}")`);
+const fileInsert = (uuid, file, datum) => {
+    connection.query(`INSERT INTO file_metadata(uuid,filename, creatieDatum) VALUES("${uuid}", "${file}", "${datum}")`);
 }
 
 module.exports = {

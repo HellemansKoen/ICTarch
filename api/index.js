@@ -55,7 +55,7 @@ app.post('/api/files', async(req, res) => {
 function rdsUpload(uuid, file, res) {
     let datum = new Date().toISOString().slice(0, 19).replace('T', ' ');
     // Datum toevoegen
-    db.fileInsert(uuid, file, datum),
+    db.fileInsert(uuid, file.name, datum),
         function(error, results, fields) {
             if (error) {
                 res.status(400).json(result);
